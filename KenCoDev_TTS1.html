@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>KenCoDev_TTS1</title>
+</head>
+<body>
+  <h1>Text To Voice (TTS)</h1>
+ 
+  <textarea id="texto" rows="4" cols="50" placeholder="Escribe aqui... / Type here.."></textarea><br><br>
+ 
+  <button onclick="hablar()">Hablar / Talk</button>
+  <button onclick="borrar()">Borrar / Erase</button>
+
+  <script>
+    function hablar() {
+      const texto = document.getElementById('texto').value;
+      if (!texto.trim()) return;
+      const utter = new SpeechSynthesisUtterance(texto);
+
+      // No forzamos español: dejamos que el sistema use su voz por defecto
+      const voces = speechSynthesis.getVoices();
+      if (voces.length > 0) {
+        // Selecciona la voz por defecto del sistema
+        utter.voice = voces[0];
+        utter.lang = voces[0].lang;
+      }
+
+      speechSynthesis.speak(utter);
+    }
+
+    function borrar() {
+      speechSynthesis.cancel(); // detener cualquier voz en curso
+      document.getElementById('texto').value = ""; // limpiar el textarea
+      document.getElementById('texto').focus(); // volver a enfocar el textarea
+    }
+
+    // Atajos de teclado
+    document.addEventListener('keydown', function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault(); // evita salto de línea en el textarea
+        hablar();
+      }
+      if (event.key === "Delete") {
+        borrar();
+      }
+    });
+
+    window.speechSynthesis.onvoiceschanged = () => {};
+  </script>
+
+  <p style="font-size:11px;">https://contactokencodev.github.io/text-to-voice/
+</p>
+</body>
+</html>
