@@ -2,54 +2,104 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>KenCoDev_TTS1</title>
+  <title>KenCoDev_TTS1 ñ</title>
 </head>
 <body>
-  <h1>Text To Voice (TTS)</h1>
- 
-  <textarea id="texto" rows="4" cols="50" placeholder="Escribe aqui... / Type here.."></textarea><br><br>
- 
-  <button onclick="hablar()">Hablar / Talk</button>
-  <button onclick="borrar()">Borrar / Erase</button>
+  <h1>Text To Voice (TTS) ñ</h1>
+
+  <textarea id="texto" rows="4" cols="50" placeholder="Escribe aquíí o fin con ñ... / Type here.."></textarea><br><br>
+
+  <button onclick="hablar()">5.- Hablar / Talk</button>
+  <button onclick="borrar()">1,2,3,n.- Borrar / Erase</button>
+  <button onclick="probar()">4.- Prueba / Test Audio</button>
+
+  <!-- Mini instrucciones debajo de los botones -->
+  <p style="font-size:12px; margin-top:8px;">
+    🔢 Orden de uso de botones:<br>
+    1️⃣ Pulsa <b>Borrar/Erase</b> (primera vez)<br>
+    2️⃣ Pulsa <b>Borrar/Erase</b> (segunda vez)<br>
+    3️⃣ Pulsa <b>Borrar/Erase</b> (tercera vez)<br>
+    4️⃣ Pulsa <b>Prueba/Test Audio</b><br>
+    5️⃣ Escribe tu texto y pulsa <b>Hablar/Talk</b>
+  </p>
+
+  <p style="font-size:12px; margin-top:4px;">
+    🔢 Button usage order:<br>
+    1️⃣ Press <b>Borrar/Erase</b> (first time)<br>
+    2️⃣ Press <b>Borrar/Erase</b> (second time)<br>
+    3️⃣ Press <b>Borrar/Erase</b> (third time)<br>
+    4️⃣ Press <b>Prueba/Test Audio</b><br>
+    5️⃣ Type your text and press <b>Hablar/Talk</b>
+  </p>
 
   <script>
-    function hablar() {
-      const texto = document.getElementById('texto').value;
-      if (!texto.trim()) return;
-      const utter = new SpeechSynthesisUtterance(texto);
+    let vocesDisponibles = [];
 
-      // No forzamos español: dejamos que el sistema use su voz por defecto
-      const voces = speechSynthesis.getVoices();
-      if (voces.length > 0) {
-        // Selecciona la voz por defecto del sistema
-        utter.voice = voces[0];
-        utter.lang = voces[0].lang;
+    // Cargar voces cuando estén listas
+    window.speechSynthesis.onvoiceschanged = () => {
+      vocesDisponibles = speechSynthesis.getVoices();
+    };
+
+    function detectarIdioma(texto) {
+      const esRegex = /[áéíóúñ¿¡]/i;
+      return esRegex.test(texto) ? "es-MX" : "en-US";
+    }
+
+    function hablar() {
+      const texto = document.getElementById('texto').value.trim();
+      if (!texto) return;
+
+      if (vocesDisponibles.length === 0) {
+        alert("Las voces aún no están listas, intenta de nuevo.");
+        return;
       }
 
-      speechSynthesis.speak(utter);
+      const utter = new SpeechSynthesisUtterance(texto);
+
+      // Detectar idioma automáticamente
+      const idioma = detectarIdioma(texto);
+      const voz = vocesDisponibles.find(v => v.lang.includes(idioma.split("-")[0]));
+      utter.voice = voz || vocesDisponibles[0];
+      utter.lang = voz?.lang || idioma;
+
+      utter.rate = 1;
+      utter.pitch = 1;
+
+      speechSynthesis.cancel();
+      setTimeout(() => {
+        speechSynthesis.speak(utter);
+      }, 100);
     }
 
     function borrar() {
-      speechSynthesis.cancel(); // detener cualquier voz en curso
-      document.getElementById('texto').value = ""; // limpiar el textarea
-      document.getElementById('texto').focus(); // volver a enfocar el textarea
+      speechSynthesis.cancel();
+      document.getElementById('texto').value = "";
+      document.getElementById('texto').focus();
     }
 
-    // Atajos de teclado
+    function probar() {
+      if (vocesDisponibles.length === 0) {
+        alert("Las voces aún no están listas, intenta de nuevo.");
+        return;
+      }
+      const utter = new SpeechSynthesisUtterance("Prueba de voz / Voice test");
+      utter.lang = "es-MX";
+      speechSynthesis.cancel();
+      speechSynthesis.speak(utter);
+    }
+
+    // Atajos de teclado (más útiles en PC)
     document.addEventListener('keydown', function(event) {
       if (event.key === "Enter") {
-        event.preventDefault(); // evita salto de línea en el textarea
+        event.preventDefault();
         hablar();
       }
       if (event.key === "Delete") {
         borrar();
       }
     });
-
-    window.speechSynthesis.onvoiceschanged = () => {};
   </script>
 
-  <p style="font-size:11px;">https://contactokencodev.github.io/text-to-voice/
-</p>
+  <p style="font-size:11px;">https://contactokencodev.github.io/text-to-voice/</p>
 </body>
 </html>
